@@ -1,4 +1,4 @@
-import fakeHistory from "../history"
+import fakeHistory from "../history.js"
 
 type Kata = {
   id: string,
@@ -7,7 +7,7 @@ type Kata = {
 }
 
 export class CodeWars {
-  private username = "tloyan"
+  private username = process.env.CODEWARS_USERNAME
   private katas: Kata[] = []
   private history: Kata[] = []
 

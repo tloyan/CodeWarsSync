@@ -2,6 +2,7 @@
   "name": "codewars-sync",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
     "dev": "tsx src/main.ts"
   },
@@ -11,6 +12,7 @@
   "dependencies": {
     "@types/node": "^22.10.1",
     "dotenv": "^16.4.7",
+    "octokit": "^4.0.2",
     "tsx": "^4.19.2"
   }
 }
