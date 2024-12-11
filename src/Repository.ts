@@ -75,5 +75,29 @@ export class Repository {
       })
     }
   }
-  getFile() {}
+
+  async getFile(path: string): Promise<string> {
+    try {
+      const { data: fileData } = await octokit.rest.repos.getContent({
+        owner: process.env.GITHUB_USERNAME,
+        repo: process.env.GITHUB_REPO_NAME,
+        path: path,
+        ref: `heads/main`
+      })
+      if ("content" in fileData) {
+        return Buffer.from(fileData.content, 'base64').toString('utf8')
+      }
+      throw new Error('Could not read file content')
+    } catch(error) {
+      throw new Error('Not Found')
+    }
+  }
+
+  async createRepo() {
+    const { data: repoData } = await octokit.rest.repos.createForAuthenticatedUser({
+      name: process.env.GITHUB_REPO_NAME,
+    });
+
+    console.log(repoData)
+  }
 }
