@@ -1,4 +1,4 @@
-import fakeHistory from "../history.js"
+import puppeteer, { Browser, Page } from 'puppeteer'
 
 type Kata = {
   id: string,
@@ -8,37 +8,25 @@ type Kata = {
 
 export class CodeWars {
   private username = process.env.CODEWARS_USERNAME
-  private accessToken = null
+  private cookies = []
+  private browser: Browser | undefined
+  private page: Page | undefined
   
   constructor() {}
 
   async init() {
-    /*
-      Does not work
-      Problem: cross origin blocked request or cloudflare ...
-      Solution: use puppeteer to make request as normal end user on navigator
-    */ 
-    this.login()
+    this.browser = await puppeteer.launch()
+    this.page = await this.browser.newPage()
+    await this.login()
+    // await this.getChallengeSolution("59d9ff9f7905dfeed50000b0")
   }
 
   private async login() {
-    // const headers = {
-    //   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
-    //   "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-    //   "Accept-Language": "en-US,en;q=0.9",
-    // };
-
-    // const res = await fetch("https://www.codewars.com/users/sign_in", {
-    //   method: "POST",
-    //   body: JSON.stringify({
-    //     user: {
-    //       email: process.env.CODEWARS_USER_EMAIL,
-    //       password: process.env.CODEWARS_USER_PASSWORD
-    //     }
-    //   }),
-    //   headers: headers
-    // })
-    // console.log(res)
+    const page = this.page!
+    await page.goto("https://www.codewars.com/users/sign_in")
+    await page.type("#user_email", process.env.CODEWARS_USER_EMAIL)
+    await page.type("#user_password", process.env.CODEWARS_USER_PASSWORD)
+    await page.click("button[type='submit']")
   }
 
   public async getCompletedChallenges() {
@@ -62,6 +50,11 @@ export class CodeWars {
   }
 
   public async getChallengeSolution(challengeId: string) {
-
+    const page = this.page
+    await page?.goto(`https://www.codewars.com/kata/${challengeId}/solutions/typescript/me/newest`)
+    await page?.waitForSelector("#solutions_list", { timeout: 60000 })
+    const solution = await page?.$eval("#solutions_list pre:first-of-type", (el) => el.textContent);
+    console.log(solution)
+    return solution
   }
 }
