@@ -8,25 +8,20 @@ type Kata = {
 
 export class CodeWars {
   private username = process.env.CODEWARS_USERNAME
-  private cookies = []
   private browser: Browser | undefined
-  private page: Page | undefined
-  
-  constructor() {}
 
   async init() {
-    this.browser = await puppeteer.launch()
-    this.page = await this.browser.newPage()
+    this.browser = await puppeteer.launch()    
     await this.login()
-    // await this.getChallengeSolution("59d9ff9f7905dfeed50000b0")
   }
 
   private async login() {
-    const page = this.page!
+    const page = await this.browser?.newPage()!
     await page.goto("https://www.codewars.com/users/sign_in")
     await page.type("#user_email", process.env.CODEWARS_USER_EMAIL)
     await page.type("#user_password", process.env.CODEWARS_USER_PASSWORD)
     await page.click("button[type='submit']")
+    await page.close()
   }
 
   public async getCompletedChallenges() {
@@ -49,12 +44,12 @@ export class CodeWars {
     return resJson
   }
 
-  public async getChallengeSolution(challengeId: string) {
-    const page = this.page
-    await page?.goto(`https://www.codewars.com/kata/${challengeId}/solutions/typescript/me/newest`)
+  public async getChallengeSolution(challengeId: string, language: string) {
+    const page = await this.browser?.newPage()
+    await page?.goto(`https://www.codewars.com/kata/${challengeId}/solutions/${language}/me/newest`)
     await page?.waitForSelector("#solutions_list", { timeout: 60000 })
     const solution = await page?.$eval("#solutions_list pre:first-of-type", (el) => el.textContent);
-    console.log(solution)
+    await page?.close()
     return solution
   }
 }
