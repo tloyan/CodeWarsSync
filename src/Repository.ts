@@ -9,7 +9,6 @@ const octokit = new Octokit({ auth: process.env.GITHUB_PASSKEY })
 export class Repository {
   private baseCommitSha: string | undefined = undefined
   private baseTreeSha: string | undefined = undefined
-  private newCommitSha: string | undefined = undefined
   private files: object[] = []
   
   async init() {
@@ -61,17 +60,19 @@ export class Repository {
       parents: this.baseCommitSha ? [this.baseCommitSha] : []
     })
 
-    this.newCommitSha = newCommit.sha
-    console.log("New Commit SHA:", this.newCommitSha);
+    this.baseCommitSha = newCommit.sha
+    this.baseTreeSha = newTree.sha
+
+    this.files = []
   }
 
   async push() {
-    if (this.newCommitSha) {
+    if (this.baseCommitSha) {
       await octokit.rest.git.updateRef({
         owner: process.env.GITHUB_USERNAME,
         repo: process.env.GITHUB_REPO_NAME,
         ref: `heads/main`,
-        sha: this.newCommitSha
+        sha: this.baseCommitSha
       })
     }
   }
