@@ -20,21 +20,42 @@ export class Sync {
 
   async init() {
     await this.repo.init()
+    await this.codewars.init()
     this.challenges = await this.codewars.getCompletedChallenges()
     this.challengesHistory = await this.getChallengeHistory()
     // this.challengeToUpdate = this.getChallengeToUpdate()
     this.challengeToUpdate = [this.getChallengeToUpdate()[0], this.getChallengeToUpdate()[1]]
     console.log(this.challengeToUpdate)
+    this.filesGroupByCommit = await this.createFilesToCommit()
+    // console.log(ftc)
+  }
+
+  async sync() {
+    for(const [pFile, sFile] of this.filesGroupByCommit) {
+      this.repo.add(pFile.path, pFile.content)
+      this.repo.add(sFile.path, sFile.content)
+      await this.repo.commit("commit kata solution")
+    }
+    await this.repo.push()
   }
 
   async createFilesToCommit() {
-    this.challengeToUpdate.map(async (challenge) => {
+    const ftc = await Promise.all(this.challengeToUpdate.map(async (challenge) => {
       const challengeDetails = await this.codewars.getChallengeDetails(challenge.id)
-      challenge.completedLanguages.map(async (language) => {
-        const solution = this.codewars.getChallengeSolution(challenge.id)
-        // new FileToCommit()
-      })
-    })
+      
+      const challengeSolutions = await Promise.all(challenge.completedLanguages.map(async (language) => {
+        // console.log("language: ", language)
+        const solution = await this.codewars.getChallengeSolution(challenge.id, language)
+        // console.log("solution: ", solution)
+        const ftc = new FileToCommit({...challengeDetails, language: language, solution: solution })
+        const readmeFile = ftc.readme()
+        const solutionFile = ftc.solution()
+        return [readmeFile, solutionFile]
+      }))
+      return challengeSolutions.flat()
+    }))
+    ftc.map((x) => console.log(x))
+    return ftc
   }
 
   getChallengeToUpdate() {
