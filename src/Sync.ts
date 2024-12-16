@@ -2,7 +2,7 @@ import { CodeWars } from './CodeWars.js';
 import { FileToCommit } from './FileToCommit.js';
 import { Repository } from './Repository.js';
 
-type Kata = {
+export type Kata = {
   id: string,
   completedAt: string,
   completedLanguages: string[] 
@@ -26,36 +26,31 @@ export class Sync {
     // this.challengeToUpdate = this.getChallengeToUpdate()
     this.challengeToUpdate = [this.getChallengeToUpdate()[0], this.getChallengeToUpdate()[1]]
     console.log(this.challengeToUpdate)
-    this.filesGroupByCommit = await this.createFilesToCommit()
-    // console.log(ftc)
   }
 
   async sync() {
-    for(const [pFile, sFile] of this.filesGroupByCommit) {
+    for await (const [pFile, sFile, hFile] of this.getFilesToCommit()) {
+      console.log("history:", this.challengesHistory)
       this.repo.add(pFile.path, pFile.content)
       this.repo.add(sFile.path, sFile.content)
+      this.repo.add(hFile.path, hFile.content)
+      console.log("commit: commit kata solution")
       await this.repo.commit("commit kata solution")
+      await this.repo.push()
     }
-    await this.repo.push()
   }
 
-  async createFilesToCommit() {
-    const ftc = await Promise.all(this.challengeToUpdate.map(async (challenge) => {
+
+  async *getFilesToCommit() {
+    for(const challenge of this.challengeToUpdate) {
       const challengeDetails = await this.codewars.getChallengeDetails(challenge.id)
-      
-      const challengeSolutions = await Promise.all(challenge.completedLanguages.map(async (language) => {
-        // console.log("language: ", language)
+      for(const language of challenge.completedLanguages) {
         const solution = await this.codewars.getChallengeSolution(challenge.id, language)
-        // console.log("solution: ", solution)
-        const ftc = new FileToCommit({...challengeDetails, language: language, solution: solution })
-        const readmeFile = ftc.readme()
-        const solutionFile = ftc.solution()
-        return [readmeFile, solutionFile]
-      }))
-      return challengeSolutions.flat()
-    }))
-    ftc.map((x) => console.log(x))
-    return ftc
+        console.log("solution: ", solution)
+        const ftc = new FileToCommit({...challengeDetails, language: language, solution: solution }, this.challengesHistory)
+        yield [ftc.readme(), ftc.solution(), ftc.history()]
+      }
+    }
   }
 
   getChallengeToUpdate() {
