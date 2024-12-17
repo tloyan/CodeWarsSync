@@ -5,7 +5,7 @@ import { Repository } from './Repository.js';
 export type Kata = {
   id: string,
   completedAt: string,
-  completedLanguages: string[] 
+  completedLanguages: string[]
 }
 
 
@@ -16,7 +16,6 @@ export class Sync {
   private challenges: Kata[] = []
   private challengesHistory: Kata[] = []
   private challengeToUpdate: Kata[] = []
-  private filesGroupByCommit: Array<Array<{ path: string, content: string }>> = []
 
   async init() {
     await this.repo.init()
@@ -42,12 +41,12 @@ export class Sync {
 
 
   async *getFilesToCommit() {
-    for(const challenge of this.challengeToUpdate) {
+    for (const challenge of this.challengeToUpdate) {
       const challengeDetails = await this.codewars.getChallengeDetails(challenge.id)
-      for(const language of challenge.completedLanguages) {
+      for (const language of challenge.completedLanguages) {
         const solution = await this.codewars.getChallengeSolution(challenge.id, language)
-        console.log("solution: ", solution)
-        const ftc = new FileToCommit({...challengeDetails, language: language, solution: solution }, this.challengesHistory)
+        const completedAt = this.challenges.find(({ id }) => id === challenge.id)?.completedAt
+        const ftc = new FileToCommit({ ...challengeDetails, language: language, solution: solution, completedAt: completedAt }, this.challengesHistory)
         yield [ftc.readme(), ftc.solution(), ftc.history()]
       }
     }
@@ -74,10 +73,10 @@ export class Sync {
         return challengesHistory
       }
       throw new Error("History File Corrupted")
-    } catch(error) {
+    } catch (error) {
       return []
     }
   }
 
-  async run() {}
+  async run() { }
 }
