@@ -15,16 +15,23 @@ type ChallengeDetailsType = {
   completedAt: string;
 }
 
-import path from 'path';
 import { Kata } from './Sync.js';
 
+import { EXTENSIONS } from './types/extensions.d.js';
+
 export class FileToCommit {
-  constructor(private challengeDetails: ChallengeDetailsType, private challengesHistory: Kata[]) {}
+  constructor(private challengeDetails: ChallengeDetailsType, private challengesHistory: Kata[]) { }
+
+  getRankFolder(): string {
+    const rankId = this.challengeDetails.rank.id
+    const absoluteRank = Math.abs(rankId)
+    return rankId < 0 ? `${absoluteRank}kyu` : `${absoluteRank}dan`
+  }
 
   readme() {
     const challengeDetails = this.challengeDetails
     return {
-      path: `${challengeDetails.rank.id}/${challengeDetails.language}/${challengeDetails.slug}/problem.md`,
+      path: `${this.getRankFolder()}/${challengeDetails.language}/${challengeDetails.slug}/problem.md`,
       content: challengeDetails.description
     }
   }
@@ -32,15 +39,18 @@ export class FileToCommit {
   solution() {
     const challengeDetails = this.challengeDetails
     return {
-      path: `${challengeDetails.rank.id}/${challengeDetails.language}/${challengeDetails.slug}/solution.${this.getExtention(challengeDetails.language)}`,
+      path: `${this.getRankFolder()}/${challengeDetails.language}/${challengeDetails.slug}/solution.${this.getExtention(challengeDetails.language)}`,
       content: challengeDetails.solution
     }
   }
 
+  commit() {
+    return `${this.getRankFolder()}/${this.challengeDetails.language}/${this.challengeDetails.slug}`
+  }
+
   history() {
     const challengeDetails = this.challengeDetails
-
-    const hChallenge = this.challengesHistory.find(({id}) => id === challengeDetails.id)
+    const hChallenge = this.challengesHistory.find(({ id }) => id === challengeDetails.id)
 
     if (hChallenge) {
       const newHChallenge = {
@@ -48,7 +58,7 @@ export class FileToCommit {
         completedLanguages: hChallenge.completedLanguages.includes(challengeDetails.language) ? [...hChallenge.completedLanguages] : [...hChallenge.completedLanguages, challengeDetails.language],
         completedAt: challengeDetails.completedAt
       }
-      const hIndex = this.challengesHistory.findIndex(({id}) => id === challengeDetails.id)
+      const hIndex = this.challengesHistory.findIndex(({ id }) => id === challengeDetails.id)
       this.challengesHistory[hIndex] = newHChallenge
     } else {
       this.challengesHistory.push({
@@ -65,6 +75,8 @@ export class FileToCommit {
   }
 
   getExtention(language: string) {
-    return { "typescript": "ts", "python": "py", "javascript": "js" }[language]
+    const ext = EXTENSIONS[language.toLowerCase() as keyof typeof EXTENSIONS]
+    if (!ext) throw new Error(`Language non supporté: ${language}`)
+    return ext
   }
 }
