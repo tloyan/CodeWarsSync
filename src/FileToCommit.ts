@@ -16,6 +16,8 @@ type ChallengeDetailsType = {
 }
 
 import { Kata } from './Sync.js';
+import { getReadmeTemplate } from './fileTemplate.js';
+import { Challenge } from './types/challenge.js';
 
 import { EXTENSIONS } from './types/extensions.d.js';
 
@@ -31,8 +33,8 @@ export class FileToCommit {
   readme() {
     const challengeDetails = this.challengeDetails
     return {
-      path: `${this.getRankFolder()}/${challengeDetails.language}/${challengeDetails.slug}/problem.md`,
-      content: challengeDetails.description
+      path: `${this.getRankFolder()}/${challengeDetails.language}/${challengeDetails.slug}/readme.md`,
+      content: getReadmeTemplate(challengeDetails as unknown as Challenge)
     }
   }
 
