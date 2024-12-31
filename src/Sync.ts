@@ -1,6 +1,6 @@
-import { CodeWars } from './CodeWars.js';
-import { FileToCommit } from './FileToCommit.js';
-import { Repository } from './Repository.js';
+import { CodeWars } from './CodeWars';
+import { FileToCommit } from './FileToCommit';
+import { Repository } from './Repository';
 
 export type Kata = {
   id: string,

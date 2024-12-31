@@ -15,11 +15,11 @@ type ChallengeDetailsType = {
   completedAt: string;
 }
 
-import { Kata } from './Sync.js';
-import { getReadmeTemplate } from './fileTemplate.js';
-import { Challenge } from './types/challenge.js';
+import { Kata } from './Sync';
+import { getReadmeTemplate } from './fileTemplate';
+import { Challenge } from './types/challenge';
 
-import { EXTENSIONS } from './types/extensions.d.js';
+import { EXTENSIONS } from './types/extensions';
 
 export class FileToCommit {
   constructor(private challengeDetails: ChallengeDetailsType, private challengesHistory: Kata[]) { }
@@ -77,6 +77,7 @@ export class FileToCommit {
   }
 
   getExtention(language: string) {
+    console.log("test: => ", EXTENSIONS["javascript"])
     const ext = EXTENSIONS[language.toLowerCase() as keyof typeof EXTENSIONS]
     if (!ext) throw new Error(`Language non supporté: ${language}`)
     return ext

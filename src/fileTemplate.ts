@@ -1,4 +1,4 @@
-import { Challenge } from './types/challenge.js';
+import { Challenge } from './types/challenge';
 
 export function getReadmeTemplate(challenge: Challenge) {
   const currentDate = new Date().toLocaleDateString("fr-FR", {
