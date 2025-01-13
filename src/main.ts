@@ -4,6 +4,8 @@ dotenv.config();
 import { User } from "./User";
 import { CodeWars } from './CodeWars';
 import { BrowserDriver } from './BrowserDriver';
+import { CodewarsLoader } from './CodewarsLoader';
+import { Browser } from 'puppeteer';
 
 async function main() {
   const browser = new BrowserDriver()
@@ -15,6 +17,9 @@ async function main() {
     if (!_session_id) {
       throw new Error("Not logged in")
     }
+
+    const codewarsLoader: CodewarsLoader = new CodewarsLoader(browser)
+
     await browser.close()
   } catch (error) {
     await browser.close()
