@@ -1,28 +1,29 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { Octokit } from 'octokit'
+import { Octokit } from "octokit";
 
 const octokit = new Octokit({ auth: process.env.GITHUB_PASSKEY })
-
 
 export class Repository {
   private baseCommitSha: string | undefined = undefined
   private baseTreeSha: string | undefined = undefined
   private files: object[] = []
-  
+
+  constructor(private username: string, private repoName: string) { }
+
   async init() {
     const { data: refData } = await octokit.rest.git.getRef({
-      owner: process.env.GITHUB_USERNAME,
-      repo: process.env.GITHUB_REPO_NAME,
+      owner: this.username,
+      repo: this.repoName,
       ref: "heads/main"
     })
     this.baseCommitSha = refData.object.sha
     console.log("Base Commit SHA:", this.baseCommitSha);
 
     const { data: commitData } = await octokit.rest.git.getCommit({
-      owner: process.env.GITHUB_USERNAME,
-      repo: process.env.GITHUB_REPO_NAME,
+      owner: this.username,
+      repo: this.repoName,
       commit_sha: this.baseCommitSha,
     });
     this.baseTreeSha = commitData.tree.sha;
@@ -44,8 +45,8 @@ export class Repository {
     }
 
     const { data: newTree } = await octokit.rest.git.createTree({
-      owner: process.env.GITHUB_USERNAME,
-      repo: process.env.GITHUB_REPO_NAME,
+      owner: this.username,
+      repo: this.repoName,
       base_tree: this.baseTreeSha,
       tree: this.files
     })
@@ -53,8 +54,8 @@ export class Repository {
     console.log("New Tree SHA:", newTree.sha);
 
     const { data: newCommit } = await octokit.rest.git.createCommit({
-      owner: process.env.GITHUB_USERNAME,
-      repo: process.env.GITHUB_REPO_NAME,
+      owner: this.username,
+      repo: this.repoName,
       message: message,
       tree: newTree.sha,
       parents: this.baseCommitSha ? [this.baseCommitSha] : []
@@ -69,8 +70,8 @@ export class Repository {
   async push() {
     if (this.baseCommitSha) {
       await octokit.rest.git.updateRef({
-        owner: process.env.GITHUB_USERNAME,
-        repo: process.env.GITHUB_REPO_NAME,
+        owner: this.username,
+        repo: this.repoName,
         ref: `heads/main`,
         sha: this.baseCommitSha
       })
@@ -80,8 +81,8 @@ export class Repository {
   async getFile(path: string): Promise<string> {
     try {
       const { data: fileData } = await octokit.rest.repos.getContent({
-        owner: process.env.GITHUB_USERNAME,
-        repo: process.env.GITHUB_REPO_NAME,
+        owner: this.username,
+        repo: this.repoName,
         path: path,
         ref: `heads/main`
       })
@@ -89,7 +90,7 @@ export class Repository {
         return Buffer.from(fileData.content, 'base64').toString('utf8')
       }
       throw new Error('Could not read file content')
-    } catch(error) {
+    } catch (error) {
       throw new Error('Not Found')
     }
   }

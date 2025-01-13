@@ -2,10 +2,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { User } from "./User";
-import { CodeWars } from './CodeWars';
 import { BrowserDriver } from './BrowserDriver';
 import { CodewarsLoader } from './CodewarsLoader';
-import { Browser } from 'puppeteer';
+import { Repository } from './Repository';
 
 async function main() {
   const browser = new BrowserDriver()
@@ -19,6 +18,9 @@ async function main() {
     }
 
     const codewarsLoader: CodewarsLoader = new CodewarsLoader(browser)
+    const repository = new Repository(process.env.GITHUB_USERNAME, process.env.GITHUB_REPO_NAME)
+
+    const user = new User(process.env.CODEWARS_USER as string, codewarsLoader, repository)
 
     await browser.close()
   } catch (error) {
