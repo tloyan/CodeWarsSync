@@ -25,9 +25,8 @@ export class FileToCommit {
   constructor(private challengeDetails: ChallengeDetailsType, private challengesHistory: Kata[]) { }
 
   getRankFolder(): string {
-    const rankId = this.challengeDetails.rank.id
-    const absoluteRank = Math.abs(rankId)
-    return rankId < 0 ? `${absoluteRank}kyu` : `${absoluteRank}dan`
+    const rankName = this.challengeDetails.rank.name
+    return rankName.toLowerCase().replace(/\s/g, "-")
   }
 
   readme() {
@@ -71,7 +70,7 @@ export class FileToCommit {
     }
 
     return {
-      path: "history.json",
+      path: "challenges.json",
       content: JSON.stringify(this.challengesHistory)
     }
   }

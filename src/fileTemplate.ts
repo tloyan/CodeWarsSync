@@ -7,44 +7,44 @@ export function getReadmeTemplate(challenge: Challenge) {
     day: "numeric",
   });
 
-  return `# ${challenge.name}
+  return `# ${challenge?.name}
 
 ## 🏅 Rank
-**${challenge.rank.name}** (${challenge.rank.color})
+**${challenge?.rank?.name}** (${challenge?.rank?.color})
 
 ## 🗂️ Catégorie
 **${challenge.category}**
 
 ## 🏷️ Tags
-- ${challenge.tags.join('\n- ')}
+- ${challenge?.tags?.join('\n- ')}
 
 ---
 
 ## 💻 Langages Disponibles
-- ${challenge.languages.join('\n- ')}
+- ${challenge?.languages?.join('\n- ')}
 
 ---
 
 ## 📜 Description du Kata
 
-${challenge.description}
+${challenge?.description}
 
 ---
 
 ## 🔗 Liens
-- [Voir le Kata sur Codewars](${challenge.url})
-- **Auteur** : [${challenge.createdBy.username}](${challenge.createdBy.url})
-- **Approuvé par** : [${challenge.approvedBy.username}](${challenge.approvedBy.url})
+- [Voir le Kata sur Codewars](${challenge?.url})
+- **Auteur** : [${challenge?.createdBy?.username}](${challenge?.createdBy?.url})
+- **Approuvé par** : [${challenge?.approvedBy?.username}](${challenge?.approvedBy?.url})
 
 ---
 
 ## 📈 Statistiques
-- **Total de tentatives** : ${challenge.totalAttempts}
-- **Total de solutions validées** : ${challenge.totalCompleted}
-- **Nombre d'étoiles** : ⭐ ${challenge.totalStars}
-- **Score des votes** : 👍 ${challenge.voteScore}
-- **Suggestions non résolues** : ${challenge.unresolved?.suggestions ?? 0}
-- **Problèmes non résolus** : ${challenge.unresolved?.issues ?? 0}
+- **Total de tentatives** : ${challenge?.totalAttempts}
+- **Total de solutions validées** : ${challenge?.totalCompleted}
+- **Nombre d'étoiles** : ⭐ ${challenge?.totalStars}
+- **Score des votes** : 👍 ${challenge?.voteScore}
+- **Suggestions non résolues** : ${challenge?.unresolved?.suggestions ?? 0}
+- **Problèmes non résolus** : ${challenge?.unresolved?.issues ?? 0}
 
 ---
 

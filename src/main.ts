@@ -5,6 +5,7 @@ import { User } from "./User";
 import { BrowserDriver } from './BrowserDriver';
 import { CodewarsLoader } from './CodewarsLoader';
 import { Repository } from './Repository';
+import { Synchronizer } from './Synchronizer';
 
 async function main() {
   const browser = new BrowserDriver()
@@ -19,36 +20,18 @@ async function main() {
 
     const codewarsLoader: CodewarsLoader = new CodewarsLoader(browser)
     const repository = new Repository(process.env.GITHUB_USERNAME, process.env.GITHUB_REPO_NAME)
+    await repository.init()
 
-    const user = new User(process.env.CODEWARS_USER as string, codewarsLoader, repository)
+    const user = new User(process.env.CODEWARS_USERNAME as string, codewarsLoader, repository)
+
+    const synchronizer = new Synchronizer(user, codewarsLoader, repository)
+    await synchronizer.sync()
 
     await browser.close()
   } catch (error) {
+    console.error(error)
     await browser.close()
   }
-
-  // get user's codewars challenges - User
-  // get user's challenges from history - User
-
-  // get challenges to update - Sync (self)
-  // for each challenge to update - Sync (self)
-
-  // get challenge details - Challenge -> CodeWars -> BrowserDriver
-
-  // for each completed language
-  // get challenge solution - Challenge -> CodeWars -> BrowserDriver
-
-  // create file problem.md - FileToCommit
-  // add file to repository - Repository
-  // create file solution.ext - FileToCommit
-  // add file to repository - Repository
-  // create / update file challenges.json  
-  // add file to repository - Repository
-  // commit file to repository - Repository
-  // push to repository - Repository
-
-  // commit file to repository - Repository
-  // push to repository
 }
 
 main()
