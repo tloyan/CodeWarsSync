@@ -1,6 +1,6 @@
-import { Challenge } from './types/challenge';
+import { ChallengeDetails } from './types/challengeDetails';
 
-export function getReadmeTemplate(challenge: Challenge) {
+export function getReadmeTemplate(challenge: ChallengeDetails): string {
   const currentDate = new Date().toLocaleDateString("fr-FR", {
     year: "numeric",
     month: "long",

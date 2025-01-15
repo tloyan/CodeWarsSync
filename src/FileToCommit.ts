@@ -1,31 +1,14 @@
-type ChallengeDetailsType = {
-  id: string;
-  name: string;
-  slug: string;
-  category: string;
-  url: string;
-  rank: {
-    id: number;
-    name: string;
-    color: string;
-  };
-  description: string;
-  language: string;
-  solution: string;
-  completedAt: string;
-}
-
-import { Kata } from './Sync';
 import { getReadmeTemplate } from './fileTemplate';
 import { Challenge } from './types/challenge';
+import { ChallengeDetails } from './types/challengeDetails';
 
 import { EXTENSIONS } from './types/extensions';
 
 export class FileToCommit {
-  constructor(private challengeDetails: ChallengeDetailsType, private challengesHistory: Kata[]) { }
+  constructor(private challengeDetails: ChallengeDetails & { language: string, solution: string, completedAt: string }, private challengesHistory: Array<Challenge & ChallengeDetails>) { }
 
   getRankFolder(): string {
-    const rankName = this.challengeDetails.rank.name
+    const rankName = this.challengeDetails.rank?.name || "unranked"
     return rankName.toLowerCase().replace(/\s/g, "-")
   }
 
@@ -33,7 +16,7 @@ export class FileToCommit {
     const challengeDetails = this.challengeDetails
     return {
       path: `${this.getRankFolder()}/${challengeDetails.language}/${challengeDetails.slug}/readme.md`,
-      content: getReadmeTemplate(challengeDetails as unknown as Challenge)
+      content: getReadmeTemplate(challengeDetails)
     }
   }
 
@@ -46,7 +29,7 @@ export class FileToCommit {
   }
 
   commit() {
-    return `${this.getRankFolder()}/${this.challengeDetails.language}/${this.challengeDetails.slug}`
+    return `${this.challengeDetails.language}: ${this.getRankFolder()} -- ${this.challengeDetails.slug}`
   }
 
   history() {
@@ -55,7 +38,7 @@ export class FileToCommit {
 
     if (hChallenge) {
       const newHChallenge = {
-        id: challengeDetails.id,
+        ...challengeDetails,
         completedLanguages: hChallenge.completedLanguages.includes(challengeDetails.language) ? [...hChallenge.completedLanguages] : [...hChallenge.completedLanguages, challengeDetails.language],
         completedAt: challengeDetails.completedAt
       }
@@ -63,7 +46,7 @@ export class FileToCommit {
       this.challengesHistory[hIndex] = newHChallenge
     } else {
       this.challengesHistory.push({
-        id: challengeDetails.id,
+        ...challengeDetails,
         completedLanguages: [challengeDetails.language],
         completedAt: challengeDetails.completedAt
       })

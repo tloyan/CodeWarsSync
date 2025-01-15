@@ -1,6 +1,7 @@
 import { CodewarsLoader } from './CodewarsLoader';
 import { FileToCommit } from './FileToCommit';
 import { Repository } from './Repository';
+import { Challenge } from './types/challenge';
 import { User } from './User';
 
 export class Synchronizer {
@@ -31,8 +32,8 @@ export class Synchronizer {
     const platformChallenges = await this.user.getPlatformChallenges();
     const repositoryChallenges = await this.user.getRepositoryChallenges();
 
-    return platformChallenges.filter((challenge: any) => {
-      return !repositoryChallenges.find((repoChallenge: any) => repoChallenge.id === challenge.id || repoChallenge.completedAt === challenge.completedAt);
+    return platformChallenges.filter((challenge: Challenge) => {
+      return !repositoryChallenges.find((repoChallenge: Challenge) => repoChallenge.id === challenge.id || repoChallenge.completedAt === challenge.completedAt);
     });
   }
 }
